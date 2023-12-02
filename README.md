@@ -1,6 +1,6 @@
-# actkosep
+# actkdpda
 
-코세프 창고관리
+경덕산업 출고관리
 
 ## Getting Started
 
