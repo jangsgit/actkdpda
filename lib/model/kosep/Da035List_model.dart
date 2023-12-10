@@ -25,26 +25,24 @@ class Da035List_model{
   late var delseq;
   late var grade;
   late var qty;
+  late var seqty;
   late var lotno;
   late var psize;
   late var uamt;
   late var samt;
   late var remark;
   late var deldefault;
-
+  late var glotno;
+  late var glasslotno;
+  late var wrpsnm01;
+  late var wrpsnm02;
 
 
 
   Da035List_model({   this.custcd,  this.spjangcd, this.fdeldate, this.fdeldatetext, this.fdelnum, this.fdelseq,
       this.cltcd,   this.cltnm,
-      this.pcode,  this.pname,  this.width,   this.thick,  this.color,  this.deldate,  this.delnum,  this.delseq,
-      this.grade,   this.qty, this.lotno, this.psize, this.uamt, this.samt, this.remark, this.deldefault});
-
-
-
-
-
-
+      this.pcode,  this.pname,  this.glotno,   this.glasslotno,   this.deldate,  this.delnum,  this.delseq,
+      this.grade,   this.qty, this.seqty, this.lotno, this.psize, this.uamt, this.samt, this.remark, this.deldefault, this.wrpsnm01, this.wrpsnm02});
 }
 
 

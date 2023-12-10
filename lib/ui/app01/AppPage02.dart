@@ -24,7 +24,7 @@ class _AppPage02State extends State<AppPage02>   {
   TextEditingController _etDate = TextEditingController();
   TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
   DateTime _selectedDate = DateTime.now(), initialDate = DateTime.now();
-  List<Da035List_model> da035Datas = da035Data;
+  List<Da035List_model> itemDataList = da035Data;
   String _dbnm = '';
   String _userid = '';
   String _username = '';
@@ -52,7 +52,6 @@ class _AppPage02State extends State<AppPage02>   {
     return formattedDate;
   }
   Future<void> sessionData() async{
-    _dbnm     = (await SessionManager().get("dbnm")).toString();
     _userid   = (await SessionManager().get("userid")).toString();
     _username = (await SessionManager().get("username")).toString();
     _perid    = (await SessionManager().get("perid")).toString();
@@ -61,9 +60,7 @@ class _AppPage02State extends State<AppPage02>   {
 
 
   Future da035list_getdata() async {
-    String _dbnm = await  SessionManager().get("dbnm");
-
-    var uritxt = CLOUD_URL + '/kosep/list03';
+    var uritxt = CLOUD_URL + '/kdmes/list03';
     var encoded = Uri.encodeFull(uritxt);
 
     Uri uri = Uri.parse(encoded);
@@ -74,7 +71,6 @@ class _AppPage02State extends State<AppPage02>   {
         'Accept' : 'application/json'
       },
       body: <String, String> {
-        'dbnm': _dbnm,
         'todate': _etDate.text
       },
     );
@@ -87,22 +83,18 @@ class _AppPage02State extends State<AppPage02>   {
             custcd:alllist[i]['custcd'],
             spjangcd:alllist[i]['spjangcd'],
             fdeldate:alllist[i]['fdeldate'],
-            fdeldatetext:alllist[i]['fdeldatetext'],
-            fdelnum:alllist[i]['fdelnum'],
-            fdelseq:alllist[i]['fdelseq'],
+            deldate:alllist[i]['deldate'],
+            delnum:alllist[i]['delnum'],
+            delseq:alllist[i]['delseq'],
             cltcd:alllist[i]['cltcd'],
             cltnm:alllist[i]['cltnm'],
             pcode:alllist[i]['pcode'],
             pname:alllist[i]['pname'],
-            width:alllist[i]['width'],
-            thick:alllist[i]['thick'],
-            color:alllist[i]['color'],
-            deldate:alllist[i]['deldate'],
-            delnum:alllist[i]['delnum'],
-            delseq:alllist[i]['delseq'],
-            grade:alllist[i]['grade'],
+            psize:alllist[i]['psize'],
             qty:alllist[i]['qty'],
-            lotno:alllist[i]['lotno']
+            seqty:alllist[i]['seqty'],
+            glotno:alllist[i]['lotno'],
+            glasslotno:alllist[i]['glasslotno'],
         );
         setState(() {
           da035Data.add(emObject);
@@ -117,9 +109,7 @@ class _AppPage02State extends State<AppPage02>   {
   }
 
   Future Del_getdata(argcode, arg1, arg2, arg3) async {
-    String _dbnm = await  SessionManager().get("dbnm");
-
-    var uritxt = CLOUD_URL + '/kosep/list03del';
+    var uritxt = CLOUD_URL + '/kdmes/list03del';
     var encoded = Uri.encodeFull(uritxt);
     Uri uri = Uri.parse(encoded);
     // print(arrBarcode);
@@ -133,12 +123,10 @@ class _AppPage02State extends State<AppPage02>   {
         'Accept' : 'application/json'
       },
       body: <String, String> {
-        'dbnm': _dbnm,
         'barcode': argcode,
         'deldate': arg1,
         'delnum': arg2,
-        'delseq': arg3,
-        'perid': _perid
+        'delseq': arg3
       },
     );
     if(response.statusCode == 200){
@@ -172,160 +160,156 @@ class _AppPage02State extends State<AppPage02>   {
         ),
         elevation: GlobalStyle.appBarElevation,
         title: Text(
-          '출고현황(Lot)',
+          '출고현황',
           style: GlobalStyle.appBarTitle,
         ),
+        actions: <Widget>[
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: TextButton(onPressed: (){
+                  setState(() {
+                    _etDate.text  ;
+                  });
+                  String ls_etdate = _etDate.text  ;
+                  if(ls_etdate.length == 0){
+                    print("일자를 입력하세요");
+                    return;
+                  }
+                  da035list_getdata();
+                  print(_etDate.text );
+                }, child: Text('검색하기')),
+              ),
+            ],
+          )
+        ],
         backgroundColor: GlobalStyle.appBarBackgroundColor,
         systemOverlayStyle: GlobalStyle.appBarSystemOverlayStyle,
 
       ),
+
       body:
-      WillPopScope(
-        onWillPop: (){
-          Navigator.pop(context);
-          return Future.value(true);
-        },
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _etDate,
-                    readOnly: true,
-                    onTap: () {
-                      _selectDateWithMinMaxDate(context);
-                    },
-                    maxLines: 1,
-                    cursorColor: Colors.grey[600],
-                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding:  EdgeInsets.all(10),
-                      suffixIcon: Icon(Icons.date_range, color: Colors.indigo),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey[600]!),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey[600]!),
-                      ),
-                      labelText: '출고일',
-                      labelStyle: TextStyle(color: BLACK_GREY),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _etDate.text  ;
-                    });
-                    String ls_etdate = _etDate.text  ;
-                    if(ls_etdate.length == 0){
-                      print("일자를 입력하세요");
-                      return;
-                    }
-                    da035list_getdata();
-                    print(_etDate.text );
+      ListView(
+        padding: EdgeInsets.all(16),
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _etDate,
+                  readOnly: true,
+                  onTap: () {
+                    _selectDateWithMinMaxDate(context);
                   },
-                  child: Text(
-                    '목록조회',
-                    style: TextStyle(
-                      color: Colors.indigo,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  maxLines: 1,
+                  cursorColor: Colors.grey[600],
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding:  EdgeInsets.all(10),
+                    suffixIcon: Icon(Icons.date_range, color: Colors.indigo),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey[600]!),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 5),
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Color(0xffcccccc),
-                    width: 1.0,
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey[600]!),
+                    ),
+                    labelText: '출고일',
+                    labelStyle: TextStyle(color: BLACK_GREY),
                   ),
                 ),
               ),
-            ),
-            Expanded(child: ListView.builder(itemCount: da035Datas.length,
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-              physics: AlwaysScrollableScrollPhysics(),
-              itemBuilder: (BuildContext context, int index){
-                return _buildListCard(da035Datas[index]);
-              },
-            ))
-          ],
-        ),
-
-      ),
-
-
-    );
-
-  }
-
-
-
-  Widget _buildListCard(Da035List_model da035Data){
-    return Card(
-        margin: EdgeInsets.only(top: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
-        elevation: 2,
-        color: Colors.white,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: (){
-            //Navigator.push(context, MaterialPageRoute(builder: (context) => AppPage11view(da035Data: da035Data)));
-          },
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: (){
-              showAlertDialog_chulgoDelete(context, da035Data.lotno, da035Data.fdeldate, da035Data.delnum, da035Data.delseq);
-              print(da035Data);
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => AppPage01_Subpage(da035Data: da035Data)));
-            },
+            ],
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             child: Container(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              margin: EdgeInsets.only(top: 15),
+              height: 0.638 * MediaQuery.of(context).size.height,
+              width: 1100,
+              child: ListView(
+                scrollDirection: Axis.vertical,
                 children: [
-                  Text(da035Data.cltnm, style: GlobalStyle.couponName),
-                  Text(da035Data.grade, style: GlobalStyle.couponName),
-                  Text(da035Data.thick+' ['+da035Data.width+'] '+da035Data.color, style: GlobalStyle.couponName),
-                  SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          GlobalStyle.iconTime,
-                          SizedBox(
-                            width: 4,
-                          ),
-                          Text(da035Data.pname , style: GlobalStyle.couponName),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: (){
-                          print(da035Data);
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => AppPage11Detail(da035Data: da035Data)));
-                        },
-                        child: Text( da035Data.lotno, style: TextStyle(
-                            fontSize: 14, color: SOFT_BLUE, fontWeight: FontWeight.bold
-                        )),
-                      ),
-                    ],
-                  ),
-                ],
+                  DataTable(
+                      showCheckboxColumn: false,
+                      columnSpacing: 25, dataRowHeight: 40,
+                      headingTextStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                      headingRowColor:
+                      MaterialStateColor.resolveWith((states) => SOFT_BLUE),
+
+                      columns: <DataColumn>[
+                        DataColumn(label: Text('No.')),
+                        DataColumn(label: Text('출고일자')),
+                        DataColumn(label: Text('번호')),
+                        DataColumn(label: Text('거래처')),
+                        DataColumn(label: Text('품목')),
+                        DataColumn(label: Text('규격')),
+                        DataColumn(label: Text('수량')),
+                        DataColumn(label: Text('검사로트')),
+                        DataColumn(label: Text('외부로트')),
+                      ],
+                      rows: List<DataRow>.generate(da035Data.length,(index)
+                      {
+                        final Da035List_model item = da035Data[index];
+                        return
+                          DataRow(
+                              onSelectChanged: (value){
+                                showAlertDialog_chulgoDelete(context, item.glotno, item.deldate, item.delnum, item.delseq);
+                              },
+                              color: MaterialStateColor.resolveWith((states){
+                                if (index % 2 == 0){
+                                  return Color(0xB8E5E5E5);
+                                }else{
+                                  return Color(0x86FFFFFF);
+                                }
+                              }),
+                              cells: [
+                                DataCell(
+                                    Container(
+                                        child: Text('${index+1}',
+                                        ))),
+                                DataCell(
+                                    Container(
+                                        child: Text(item.fdeldate
+                                        ))),
+                                DataCell(
+                                    Container(
+                                        child: Text(item.delnum
+                                        ))),
+                                DataCell(Container(
+                                  child: Text(item.cltnm,
+                                      overflow: TextOverflow.ellipsis),
+                                )),
+                                DataCell(Container(
+                                  child: Text(item.pname,
+                                      overflow: TextOverflow.ellipsis),
+                                )),
+                                DataCell(Container(
+                                  child: Text(item.psize,
+                                      overflow: TextOverflow.ellipsis),
+                                )),
+                                DataCell(Container(
+                                  child: Text(item.qty),
+                                )),
+                                DataCell(Container(
+                                  child: Text(item.glotno),
+                                )),
+                                DataCell(Container(
+                                  child: Text(item.glasslotno),
+                                )),
+                              ]
+                          );
+                      }
+                      )
+                  ),],
               ),
             ),
           ),
-        ));
+        ],
+      ),
+    );
+
   }
 
 
@@ -336,7 +320,7 @@ class _AppPage02State extends State<AppPage02>   {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ACTAS 출고등록'),
+          title: Text('출고등록'),
           content: Text(argcode + " : 삭제 하시겠습니까?"),
           actions: <Widget>[
             TextButton(
@@ -409,7 +393,7 @@ class _AppPage02State extends State<AppPage02>   {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ACTAS 출고등록'),
+          title: Text('출고등록'),
           content: Text(as_msg),
           actions: <Widget>[
             TextButton(

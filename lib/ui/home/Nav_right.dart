@@ -1,8 +1,9 @@
 import 'package:actkdpda/ui/account/tab_account.dart';
 import 'package:flutter/material.dart';
 
-import '../app01/AppPage01.dart';
+import '../app01/AppPage05.dart';
 import '../app01/AppPage02.dart';
+import '../app01/AppPage03.dart';
 import '../home/tab_home.dart';
 
 
@@ -55,13 +56,13 @@ class Nav_right extends StatelessWidget{
               title: GestureDetector(
                   onTap: (){
                     Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => AppPage01()));                    },
+                        MaterialPageRoute(builder: (context) => AppPage05()));                    },
                   child:  Row(
                       children:[
                         Icon(Icons.favorite),
                         SizedBox(
                             width: 10),
-                        Text('코세프출고'),
+                        Text('출고등록'),
                       ]))),
           ListTile(
               title: GestureDetector(

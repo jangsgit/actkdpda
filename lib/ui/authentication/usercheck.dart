@@ -28,7 +28,7 @@ Future<Map<String, dynamic>> Usercheck(String userid, String userpw) async{
     userinfo = jsonDecode(response.body);
     // await SessionManager().set('userinfo', userinfo);
     // userinfo u = userinfo.fromJson(await SessionManager().get("saupnum"));
-    // print(userinfo);
+     print(userinfo);
     await SessionManager().set("userid", userinfo['userid']);
     await SessionManager().set("username", userinfo['username']);
     // await SessionManager().set("useyn", userinfo['useyn']);
@@ -37,7 +37,7 @@ Future<Map<String, dynamic>> Usercheck(String userid, String userpw) async{
     //await SessionManager().set("actcd", userinfo['actcd']);
     // await SessionManager().set("cltcd", userinfo['cltcd']);
     // await SessionManager().set("flag", userinfo['flag']);
-    await SessionManager().set("dbnm", userinfo['dbnm']);
+    //await SessionManager().set("dbnm", userinfo['dbnm']);
     // await SessionManager().set("perid", userinfo['perid']);
     // await SessionManager().set("pernm", userinfo['pernm']);
     // await SessionManager().set("custcd", userinfo['custcd']);

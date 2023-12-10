@@ -22,7 +22,9 @@ class AppPage05 extends StatefulWidget {
 class _AppPage05State extends State<AppPage05> {
 
   String arrBarcode = "";
+  String arrBarcode_G = "";
   final List<String> arrBarcodeText = <String>[];
+  final List<String> arrBarcodeText_G  = <String>[];
   final List<int> colorCodes = <int>[500, 600, 100];
   String _dbnm = '';
   String _userid = '';
@@ -53,6 +55,8 @@ class _AppPage05State extends State<AppPage05> {
     super.initState();
     arrBarcode = "";
     arrBarcodeText.clear();
+    arrBarcode_G  = "";
+    arrBarcodeText_G .clear();
     PointmobileScanner.channel.setMethodCallHandler(_onBarcodeScannerHandler);
     PointmobileScanner.initScanner();
     PointmobileScanner.enableScanner();
@@ -93,9 +97,9 @@ class _AppPage05State extends State<AppPage05> {
 
 
   Future da006list_getdata() async {
-    String _dbnm = await  SessionManager().get("dbnm");
+    //String _username = await  SessionManager().get("username");
 
-    var uritxt = CLOUD_URL + '/kosep/list02';
+    var uritxt = CLOUD_URL + '/kdmes/list02';
     var encoded = Uri.encodeFull(uritxt);
     Uri uri = Uri.parse(encoded);
     // print(arrBarcode);
@@ -104,8 +108,12 @@ class _AppPage05State extends State<AppPage05> {
     //  arrBarcode = 'R1022204247|R1022204248';
     _lsDeldate =  _etDate.text;
     _lsDelnum = "0000";
-    print("_lsDeldate=>" + _lsDeldate);
-    print("_lsDelnum=>" + _lsDelnum);
+    print('arrBarcode---->' + arrBarcode);
+    print('arrBarcode_G---->' + arrBarcode_G);
+    print('_lsDeldate---->' + _lsDeldate);
+    print('_lsDelnum---->' + _lsDelnum);
+    print('_username---->' + _username);
+    print('_userid---->' + _userid);
     final response = await http.post(
       uri,
       headers: <String, String> {
@@ -113,20 +121,11 @@ class _AppPage05State extends State<AppPage05> {
         'Accept' : 'application/json'
       },
       body: <String, String> {
-        'dbnm': _dbnm,
         'itemcd': arrBarcode,
-        'pcode': _lsDelpcode,
-        'cltcd': _lsDelcltcd,
+        'itemcd_g': arrBarcode_G,
         'fdeldate': _lsDeldate,
         'fdelnum': _lsDelnum,
-        'fdelseq': _lsDelseq,
-        'grade': _lsEtGrade,
-        'width': _lsEtWidth,
-        'thick': _lsEtThick,
-        'color': _lsEtColor,
-        'qty'  : _totqty.toString(),
-        'uamt'  : _uamt.toString(),
-        'perid': _perid
+        'userid': _userid
       },
     );
     if(response.statusCode == 200){
@@ -138,6 +137,8 @@ class _AppPage05State extends State<AppPage05> {
           setState(() {
             arrBarcode = "";
             arrBarcodeText.clear();
+            arrBarcode_G = "";
+            arrBarcodeText_G.clear();
             _etBarcode =TextEditingController(text: "");
           });
           // Navigator.push(context, MaterialPageRoute(builder: (context) => AppPage01()));
@@ -166,7 +167,7 @@ class _AppPage05State extends State<AppPage05> {
 
         ),
         elevation: GlobalStyle.appBarElevation,
-        title: Text('출고등록 LOT',
+        title: Text('출고등록',
           style: GlobalStyle.appBarTitle,
         ),
         backgroundColor: GlobalStyle.appBarBackgroundColor,
@@ -208,19 +209,20 @@ class _AppPage05State extends State<AppPage05> {
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey[600]!),
                   ),
-                  labelText: '출고예정일',
+                  labelText: '출고일자',
                   labelStyle: TextStyle(color: BLACK_GREY),
                 ),
               ),
             SizedBox(
               height: 10,
             ),
+
             SizedBox(
               width: 100,
               child: TextField(
                 controller: _etBarcode,
                 readOnly: true,
-                maxLines: 3,
+                maxLines: 15,
                 autofocus: true,
                 onTap: (){
                   print(arrBarcode);
@@ -300,37 +302,69 @@ class _AppPage05State extends State<AppPage05> {
     if(_lsItemcd == 'READ_FAIL'){
       showAlertDialog(context, "바코드 스캔을 실패했습니다.");
     }else{
-
-      for(var code in arrBarcodeText){
-        if(code == _lsItemcd){
-          showAlertDialog(context, "동일한 코드가 스캔되었습니다.");
-          return ;
+      String ls_gchk = "";
+      ls_gchk = _lsItemcd.substring(10,11);
+      print("ls_gchk--->" + ls_gchk);
+      if(ls_gchk == "G"){
+        for(var code in arrBarcodeText_G){
+          if(code == _lsItemcd){
+            showAlertDialog(context, "동일한 검사 코드가 스캔되었습니다.");
+            return ;
+          }
         }
+        setState(() {
+          arrBarcodeText_G.add(_lsItemcd);
+        });
+      }else{
+        for(var code in arrBarcodeText){
+          if(code == _lsItemcd){
+            showAlertDialog(context, "동일한 외부 코드가 스캔되었습니다.");
+            return ;
+          }
+        }
+        setState(() {
+          arrBarcodeText.add(_lsItemcd);
+        });
       }
-      //R1092205672
-      // _lsItemcd = 'R1092205672';
-      setState(() {
-        arrBarcodeText.add(_lsItemcd);
-      });
-      // print(arrBarcodeText);
-      // if(arrBarcodeText.length > _totqty){
-      //   showAlertDialog(context, "출고수량을 초과했습니다.");
-      //   return;
-      // }
+
       String ls_arrcode = "";
       arrBarcode = "";
+      arrBarcode_G = "";
+
+      //검사바코드값을 TEXT에 넣어준다.
+      for(var code in arrBarcodeText_G){
+        if(arrBarcode_G.length > 0){
+          arrBarcode_G = arrBarcode_G + "|" + code;
+        }else{
+          arrBarcode_G =  code;
+        }
+      }
+      //외부바코드값을 TEXT에 넣어준다.
       for(var code in arrBarcodeText){
+        if(arrBarcode.length > 0){
+          arrBarcode = arrBarcode + "|" + code;
+        }else{
+          arrBarcode =  code;
+        }
+      }
+
+      print("arrBarcode=>" + arrBarcode);
+      print("arrBarcode_G=>" + arrBarcode_G);
+
+      //검사바코드  화면표시
+      for(var code in arrBarcodeText_G){
         if(ls_arrcode.length > 0){
           ls_arrcode = ls_arrcode + " * " + code;
         }else{
           ls_arrcode =  code;
         }
       }
+      //외부바코드 화면표시
       for(var code in arrBarcodeText){
-        if(arrBarcode.length > 0){
-          arrBarcode = arrBarcode + "|" + code;
+        if(ls_arrcode.length > 0){
+          ls_arrcode = ls_arrcode + " * " + code;
         }else{
-          arrBarcode =  code;
+          ls_arrcode =  code;
         }
       }
       _etBarcode = TextEditingController(text: ls_arrcode);
@@ -358,7 +392,7 @@ class _AppPage05State extends State<AppPage05> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ACTAS 출고등록'),
+          title: Text('출고등록'),
           content: Text("출고등록을 하시겠습니까?"),
           actions: <Widget>[
             TextButton(
@@ -399,7 +433,7 @@ class _AppPage05State extends State<AppPage05> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ACTAS 출고등록'),
+          title: Text('출고등록'),
           content: Text("스캔한 LotNo를 리셋하시겠습니까?"),
           actions: <Widget>[
             TextButton(
@@ -432,7 +466,7 @@ class _AppPage05State extends State<AppPage05> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ACTAS 출고등록'),
+          title: Text('출고등록'),
           content: Text(as_msg),
           actions: <Widget>[
             TextButton(
